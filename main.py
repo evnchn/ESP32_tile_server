@@ -56,20 +56,20 @@ for up in [True, False]:
                 img = gen_grid_image(up, right, down, left)
                 img.save(filename)
 
-PAYLOAD_TO_RFID = {
-    # payload : [[up], [right], [down], [left]]
+ID_TO_RFID = {
+    # ID : [[up], [right], [down], [left]]
     0: [["0up1", "0up2", "0up3", "0up4"], ["0right1", "0right2", "0right3", "0right4"], ["0down1", "0down2", "0down3", "0down4"], ["0left1", "0left2", "0left3", "0left4"]],
-    871: [["871up1", "871up2", "871up3", "871up4"], [], [], ["871left1", "871left2", "871left3", "871left4"]],
+    17: [["17up1", "17up2", "17up3", "17up4"], [], [], ["17left1", "17left2", "17left3", "17left4"]],
 }
 
-PAYLOAD_TO_PORTS = {
-    payload: [bool(rfid_list) for rfid_list in rfid_lists]
-    for payload, rfid_lists in PAYLOAD_TO_RFID.items()
+ID_TO_PORTS = {
+    id_: [bool(rfid_list) for rfid_list in rfid_lists]
+    for id_, rfid_lists in ID_TO_RFID.items()
 }
 
-PAYLOAD_TO_IMAGE = {
-    payload: f"assets/grid_{up}_{right}_{down}_{left}.png"
-    for payload, (up, right, down, left) in PAYLOAD_TO_PORTS.items()
+ID_TO_IMAGE = {
+    id_: f"assets/grid_{up}_{right}_{down}_{left}.png"
+    for id_, (up, right, down, left) in ID_TO_PORTS.items()
 }
 
 
@@ -105,12 +105,10 @@ def render_all_grid_image(grid_dict, filename):
                 d.rectangle([col*50, row*50, (col+1)*50-1, (row+1)*50-1], outline="black", width=2)
                 # draw the ID
                 d.text((col*50+5, row*50+5), "ID:"+str(cell["ID"]), font=fnt, fill=(0,0,0))
-                # draw the payload
-                d.text((col*50+5, row*50+20), "P:"+str(cell["Payload"]), font=fnt, fill=(0,0,0))
                 # draw the port to sky
                 d.text((col*50+5, row*50+35), "PTS:"+str(cell["PortToSky"]), font=fnt, fill=(0,0,0))"""
                 # put the image of the cell
-                img_cell = Image.open(PAYLOAD_TO_IMAGE.get(cell["Payload"], "assets/grid_False_False_False_False.png"))
+                img_cell = Image.open(ID_TO_IMAGE.get(cell["ID"], "assets/grid_False_False_False_False.png"))
 
                 # rotate the image according to the port to sky
                 img_cell = img_cell.rotate((cell["PortToSky"]-1)*90)
@@ -174,7 +172,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
                 "connPort": 4,
                 "connBoardLevel": 1,
                 "connBoardID": 44,
-                "connPayloadID": 871
+                # "connPay__loadID": 871
             }
         ]
     }
@@ -183,7 +181,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
 
             for conn in conn_info["EdgeConnections"]["Connections"]:
                 print(format_time(), "=== Connection from", text_ip, ":", conn)
-                """ {'Connection': 1, 'srcPort': 2, 'srcBoardID': 0, 'connPort': 4, 'connBoardLevel': 1, 'connBoardID': 44, 'connPayloadID': 871}"""
+                """ {'Connection': 1, 'srcPort': 2, 'srcBoardID': 0, 'connPort': 4, 'connBoardLevel': 1, 'connBoardID': 44, 'connPay__loadID': 871}"""
                 # find the source board in the grid
                 for row in range(15):
                     for col in range(15):
@@ -215,7 +213,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
 
                             #print(format_time(), "=== Connected board port to sky:", conn_board_port_to_sky)
 
-                            open_status = PAYLOAD_TO_PORTS.get(conn["connPayloadID"], [False, False, False, False])
+                            open_status = ID_TO_PORTS.get(conn["connBoardID"], [False, False, False, False])
 
                             grid[row_conn][col_conn] = {"ID": conn["connBoardID"], "Payload": conn["connPayloadID"], "PortToSky": conn_board_port_to_sky, "Populated": True, 
                                                         "UpOPEN": open_status[ensure_1_2_3_4(1 + (conn_board_port_to_sky - 1)) - 1],
@@ -229,32 +227,32 @@ async def console(text_ip: str, text_channel: str, request: Request):
                             if grid[row_conn][col_conn]["UpOPEN"] and grid[row_conn-1][col_conn]["DownOPEN"]:
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn-1][col_conn]["ID"]])
                                 rfid_list_to_append = []
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(conn["connPayloadID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"])-1][::-1])
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(grid[row_conn-1][col_conn]["Payload"])[2])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"])-1][::-1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn-1][col_conn]["ID"])[2])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn-1][col_conn]["ID"]])] = rfid_list_to_append
                             # check the right neighbor, aka row_conn, col_conn+1
                             if grid[row_conn][col_conn]["RightOPEN"] and grid[row_conn][col_conn+1]["LeftOPEN"]:
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn+1]["ID"]])
                                 rfid_list_to_append = []
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(conn["connPayloadID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+1)-1][::-1])
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(grid[row_conn][col_conn+1]["Payload"])[3])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+1)-1][::-1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn+1]["ID"])[3])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn+1]["ID"]])] = rfid_list_to_append
                             # check the down neighbor, aka row_conn+1, col_conn
                             if grid[row_conn][col_conn]["DownOPEN"] and grid[row_conn+1][col_conn]["UpOPEN"]:
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn+1][col_conn]["ID"]])
                                 rfid_list_to_append = []
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(conn["connPayloadID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+2)-1][::-1])
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(grid[row_conn+1][col_conn]["Payload"])[0])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+2)-1][::-1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn+1][col_conn]["ID"])[0])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn+1][col_conn]["ID"]])] = rfid_list_to_append
                             # check the left neighbor, aka row_conn, col_conn-1
                             if grid[row_conn][col_conn]["LeftOPEN"] and grid[row_conn][col_conn-1]["RightOPEN"]:
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn-1]["ID"]])
                                 rfid_list_to_append = []
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(conn["connPayloadID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+3)-1][::-1])
-                                rfid_list_to_append.extend(PAYLOAD_TO_RFID.get(grid[row_conn][col_conn-1]["Payload"])[1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+3)-1][::-1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn-1]["ID"])[1])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn-1]["ID"]])] = rfid_list_to_append
 
@@ -302,11 +300,6 @@ def grid_page():
                 if True: #with ui.row():
                     for cell in row:
                         ui.image("/assets/R.png").classes("w-12 h-12")
-                        """if cell["Populated"]:
-                            # ui.label("Yes")
-                            ui.label(f"{cell['ID']}, {cell['Payload']}, {cell['PortToSky']}")
-                        else:
-                            ui.label("Empty")  """ 
 
 @ui.page("/gridimage")
 async def grid_image_page():
