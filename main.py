@@ -56,15 +56,15 @@ for up in [True, False]:
                 img = gen_grid_image(up, right, down, left)
                 img.save(filename)
 
-PAYLOAD_TO_PORTS = {
-    0: [True, True, True, True], # center
-    871: [True, False, False, True], # right
-}
-
 PAYLOAD_TO_RFID = {
     # payload : [[up], [right], [down], [left]]
     0: [["0up1", "0up2", "0up3", "0up4"], ["0right1", "0right2", "0right3", "0right4"], ["0down1", "0down2", "0down3", "0down4"], ["0left1", "0left2", "0left3", "0left4"]],
     871: [["871up1", "871up2", "871up3", "871up4"], [], [], ["871left1", "871left2", "871left3", "871left4"]],
+}
+
+PAYLOAD_TO_PORTS = {
+    payload: [bool(rfid_list) for rfid_list in rfid_lists]
+    for payload, rfid_lists in PAYLOAD_TO_RFID.items()
 }
 
 PAYLOAD_TO_IMAGE = {
