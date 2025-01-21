@@ -59,7 +59,7 @@ for up in [True, False]:
 ID_TO_RFID = {
     # ID : [[up], [right], [down], [left]]
     0: [["0up1", "0up2", "0up3", "0up4"], ["0right1", "0right2", "0right3", "0right4"], ["0down1", "0down2", "0down3", "0down4"], ["0left1", "0left2", "0left3", "0left4"]],
-    17: [["17up1", "17up2", "17up3", "17up4"], [], [], ["17left1", "17left2", "17left3", "17left4"]],
+    1: [["17up1", "17up2", "17up3", "17up4"], [], [], ["17left1", "17left2", "17left3", "17left4"]],
 }
 
 ID_TO_PORTS = {
