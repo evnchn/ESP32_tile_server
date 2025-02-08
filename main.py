@@ -59,7 +59,10 @@ for up in [True, False]:
 ID_TO_RFID = {
     # ID : [[up], [right], [down], [left]]
     0: [["0up1", "0up2", "0up3", "0up4"], ["0right1", "0right2", "0right3", "0right4"], ["0down1", "0down2", "0down3", "0down4"], ["0left1", "0left2", "0left3", "0left4"]],
-    1: [["17up1", "17up2", "17up3", "17up4"], [], [], ["17left1", "17left2", "17left3", "17left4"]],
+    1: [["1up1", "1up2", "1up3", "1up4"], [], [], []],
+    2: [[], [], ["2down1", "2down2", "2down3", "2down4"], []],
+    3: [[], [], [], ["3left1", "3left2", "3left3", "3left4"]],
+    4: [[], [], ["4down1", "4down2", "4down3", "4down4"], []]
 }
 
 ID_TO_PORTS = {
@@ -228,7 +231,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn-1][col_conn]["ID"]])
                                 rfid_list_to_append = []
                                 rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"])-1][::-1])
-                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn-1][col_conn]["ID"])[2])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn-1][col_conn]["ID"])[ensure_1_2_3_4(grid[row_conn-1][col_conn]["PortToSky"]+2)-1])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn-1][col_conn]["ID"]])] = rfid_list_to_append
                             # check the right neighbor, aka row_conn, col_conn+1
@@ -236,7 +239,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn+1]["ID"]])
                                 rfid_list_to_append = []
                                 rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+1)-1][::-1])
-                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn+1]["ID"])[3])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn+1]["ID"])[ensure_1_2_3_4(grid[row_conn][col_conn+1]["PortToSky"]+3)-1])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn+1]["ID"]])] = rfid_list_to_append
                             # check the down neighbor, aka row_conn+1, col_conn
@@ -244,7 +247,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn+1][col_conn]["ID"]])
                                 rfid_list_to_append = []
                                 rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+2)-1][::-1])
-                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn+1][col_conn]["ID"])[0])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn+1][col_conn]["ID"])[ensure_1_2_3_4(grid[row_conn+1][col_conn]["PortToSky"])-1])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn+1][col_conn]["ID"]])] = rfid_list_to_append
                             # check the left neighbor, aka row_conn, col_conn-1
@@ -252,7 +255,7 @@ async def console(text_ip: str, text_channel: str, request: Request):
                                 LINE_NEIGHRBOR_LIST.append([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn-1]["ID"]])
                                 rfid_list_to_append = []
                                 rfid_list_to_append.extend(ID_TO_RFID.get(conn["connBoardID"])[ensure_1_2_3_4(grid[row_conn][col_conn]["PortToSky"]+3)-1][::-1])
-                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn-1]["ID"])[1])
+                                rfid_list_to_append.extend(ID_TO_RFID.get(grid[row_conn][col_conn-1]["ID"])[ensure_1_2_3_4(grid[row_conn][col_conn-1]["PortToSky"]+1)-1])
                                 RFID_LIST.append(rfid_list_to_append)
                                 LINE_NEIGHRBOR_RFID_DICT[tuple([grid[row_conn][col_conn]["ID"], grid[row_conn][col_conn-1]["ID"]])] = rfid_list_to_append
 

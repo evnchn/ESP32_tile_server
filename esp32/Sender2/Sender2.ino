@@ -1,4 +1,4 @@
-const int myBoardID = 1;
+const int myBoardID = 4;
 int myBoardLevel = -871;  // Can be overwritten later if not 0
 const int myPayloadID = 871;
 
@@ -10,7 +10,7 @@ const int myPayloadID = 871;
 // Constants
 const char WIFI_SSID[] = "ISD-Project-22Fall";         // CHANGE IT
 const char WIFI_PASSWORD[] = "isd@2022Fall";     // CHANGE IT
-const String HOST_NAME = "http://192.168.1.100:8080"; // CHANGE IT
+const String HOST_NAME = "http://192.168.1.105:8080"; // CHANGE IT
 const String PATH_NAME = "/console/";         // CHANGE IT
 const int LED_PIN = 15;
 
